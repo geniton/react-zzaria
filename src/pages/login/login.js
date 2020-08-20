@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import styled from 'styled-components'
 import firebase from 'firebase/app'
 import 'firebase/auth'
@@ -19,11 +19,6 @@ const firebaseConfig = {
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-const login = () => {
-  const provider = new firebase.auth.GithubAuthProvider();
-  firebase.auth().signInWithRedirect(provider);
-}
-
 function Login () {
   const [userInfo,setUserInfo] = useState({
     isLogged: false,
@@ -39,39 +34,43 @@ function Login () {
     })
   },[])
 
-  const logout = () => {
+  const login = useCallback(() => {
+    const provider = new firebase.auth.GithubAuthProvider();
+    firebase.auth().signInWithRedirect(provider);
+  },[])
+
+  const logout = useCallback(() => {
     firebase.auth().signOut().then(() => {
       setUserInfo({
         isLogged: false,
         user    : null
       })
     })
-  }
+  },[])
 
   const { user, isLogged } = userInfo
-
   return (
     <>
       <Container>
-        <Grid container justify='center' spacing={40} >
+        <Grid container justify='center' spacing={4} >
           <Grid item>
             <Logo />
           </Grid>
 
-          { isLogged && (
+          { isLogged &&
             <>
               <pre>{user.displayName}</pre>
               <GitHubButton onClick={() => logout()}> Sair </GitHubButton>
             </>
-          )}
+          }
 
-          { !isLogged && (
+          { !isLogged &&
             <Grid item xs={12} container justify='center'>
               <GitHubButton onClick={() => login()}>
                 Entrar com GitHub
               </GitHubButton>
             </Grid>
-          )}
+          }
 
         </Grid>
       </Container>
